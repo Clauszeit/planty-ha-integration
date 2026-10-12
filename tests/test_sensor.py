@@ -1,5 +1,6 @@
 """Regression tests for detailed Planty sensor values and names."""
 
+import asyncio
 import unittest
 from types import SimpleNamespace
 
@@ -16,7 +17,9 @@ from custom_components.planty.sensor import (
     PlantySummarySensor,
     PlantyTaskSensor,
     SENSOR_DESCRIPTIONS,
+    async_setup_entry,
 )
+from custom_components.planty.const import DOMAIN
 
 
 class SensorDetailTest(unittest.TestCase):
@@ -158,6 +161,24 @@ class SensorDetailTest(unittest.TestCase):
         self.assertTrue(all(item["entity_id"] is None for item in attributes["plants"]))
         self.assertEqual(attributes["plant"], "Tomate")
         self.assertNotIn("variety_group_id", attributes)
+
+    def test_setup_discovers_new_varieties_once_after_snapshot_updates(self):
+        added = []
+        listeners = []
+        self.coordinator.async_add_listener = lambda callback: listeners.append(callback) or (lambda: None)
+        hass = SimpleNamespace(data={DOMAIN: {self.entry.entry_id: self.coordinator}})
+        asyncio.run(async_setup_entry(hass, self.entry, lambda entities: added.extend(entities)))
+        initial_ids = {entity.unique_id for entity in added}
+        self.assertEqual(len(initial_ids), len(added))
+        self.assertIn("entry_plant_plant-1_phase", initial_ids)
+        self.assertEqual(len(listeners), 1)
+
+        self.snapshot["plants"].append({**self.snapshot["plants"][0], "id": "plant-2", "variety": "Roma"})
+        listeners[0]()
+        updated_ids = [entity.unique_id for entity in added]
+        self.assertEqual(updated_ids.count("entry_plant_plant-2_phase"), 1)
+        listeners[0]()
+        self.assertEqual([entity.unique_id for entity in added], updated_ids)
 
     def test_place_kind_is_mapped_to_a_translatable_option(self):
         self.snapshot["places"][0]["kind"] = "unsupported kind"

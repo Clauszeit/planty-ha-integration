@@ -44,6 +44,10 @@ def prepare_sensor_imports() -> None:
     class SensorEntity:
         """Minimal sensor entity stand-in."""
 
+        @property
+        def unique_id(self):
+            return self._attr_unique_id
+
     class SensorDeviceClass:
         DATE = "date"
         ENUM = "enum"
