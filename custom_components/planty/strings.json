@@ -1,0 +1,43 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Planty",
+        "description": "Enter your Planty server URL and a read-only integration token.",
+        "data": {
+          "url": "Planty server URL",
+          "token": "Read-only token"
+        },
+        "data_description": {
+          "url": "The origin only, for example https://planty.example.org",
+          "token": "Create this token in Planty under Settings → Home Assistant."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Update Planty token",
+        "description": "The configured token is invalid or has been revoked. Enter a replacement read-only token.",
+        "data": {
+          "token": "Replacement read-only token"
+        }
+      }
+    },
+    "error": {
+      "invalid_url": "Enter the Planty server address without a path.",
+      "invalid_auth": "The token is invalid or has been revoked.",
+      "cannot_connect": "Unable to connect to the Planty server.",
+      "invalid_response": "The Planty server returned an unexpected response."
+    },
+    "abort": {
+      "already_configured": "This Planty server is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "garden_count": { "name": "Gardens" },
+      "plant_count": { "name": "Active plants" },
+      "open_task_count": { "name": "Open tasks" },
+      "overdue_task_count": { "name": "Overdue tasks" },
+      "next_task_due": { "name": "Next task due" }
+    }
+  }
+}
