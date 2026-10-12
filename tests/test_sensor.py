@@ -120,6 +120,30 @@ class SensorDetailTest(unittest.TestCase):
 
         self.assertEqual(place.native_value, "sonstiges")
 
+    def test_task_without_registered_plant_keeps_task_context(self):
+        task = PlantyTaskSensor(self.coordinator, self.entry, "garden-1", "task-1")
+
+        self.assertIsNone(task._plant_entity_id(None))
+        self.assertIsNone(task._plant_entity_id("plant-1"))
+        attributes = task.extra_state_attributes
+        self.assertEqual(attributes["plant"], "Tomate")
+        self.assertNotIn("plant_entity_id", attributes)
+
+        self.snapshot["plants"] = []
+        summary = PlantySummarySensor(
+            self.coordinator,
+            self.entry,
+            next(
+                description
+                for description in SENSOR_DESCRIPTIONS
+                if description.key == "next_task_name"
+            ),
+        )
+        self.assertEqual(summary.native_value, "Tomaten düngen")
+
+        self.snapshot["tasks"] = []
+        self.assertIsNone(summary.native_value)
+
 
 if __name__ == "__main__":
     unittest.main()
