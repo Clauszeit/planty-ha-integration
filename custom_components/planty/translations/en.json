@@ -34,10 +34,39 @@
   "entity": {
     "sensor": {
       "garden_count": { "name": "Gardens" },
+      "place_count": { "name": "Growing places" },
       "plant_count": { "name": "Active plants" },
       "open_task_count": { "name": "Open tasks" },
+      "due_today_task_count": { "name": "Tasks due today" },
       "overdue_task_count": { "name": "Overdue tasks" },
-      "next_task_due": { "name": "Next task due" }
+      "next_task_due": { "name": "Next task due" },
+      "next_task_name": { "name": "Next task" },
+      "garden_overview": { "name": "Garden overview" },
+      "place_kind": {
+        "name": "Growing place: {place}",
+        "state": {
+          "Beet": "Garden bed",
+          "Topf": "Pot",
+          "Kübel": "Planter",
+          "Balkonkasten": "Window box",
+          "Einzelpflanze": "Single plant",
+          "Sonstiges": "Other"
+        }
+      },
+      "plant_phase": {
+        "name": "Plant: {plant}",
+        "state": {
+          "sow_pending": "Sowing planned",
+          "raising": "Raising seedlings",
+          "plant_pending": "Planting planned",
+          "planted": "Planted",
+          "uprooted": "Removed",
+          "overwintering": "Overwintering",
+          "completed": "Completed",
+          "unknown": "Unknown"
+        }
+      },
+      "task_due": { "name": "Task: {task}" }
     }
   }
 }

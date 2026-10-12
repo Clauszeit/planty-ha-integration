@@ -2,7 +2,9 @@
 
 Dieses Repository enthält eine Home-Assistant-Integration für die selbst gehostete Garten-PWA Planty. Ziel ist, ausgewählte Planty-Daten und Aufgaben in Home Assistant verfügbar zu machen.
 
-Die Integration ruft den für das konfigurierte Planty-Konto freigegebenen Snapshot ab und stellt Sensoren für Gärten, aktive Pflanzen, offene Aufgaben, überfällige Aufgaben und den nächsten Aufgabentermin bereit. Die Einrichtung prüft Serveradresse und Read-only-Token.
+Die Integration ruft den für das konfigurierte Planty-Konto freigegebenen Snapshot ab. Sie stellt Konto-Kennzahlen für Gärten, Pflanzorte, aktive Pflanzen, offene, heute fällige und überfällige Aufgaben sowie die nächste Aufgabe bereit. Zusätzlich wird für jeden Garten, Pflanzort, jede Pflanze und jede Pflegeaufgabe ein eigener Sensor angelegt. Die Detail-Sensoren enthalten verfügbare Angaben wie Beschreibung und Zugriffsrolle, Standortbedingungen, Sorte und Wachstumsphase, Pflanz- und Aussaatdaten, Aufgabenstatus, Wiederholung, Düngemittel und verknüpfte Pflanze oder Pflanzort. Die Einrichtung prüft Serveradresse und Read-only-Token.
+
+Die Sensoren werden in Home Assistant mit deutschen oder englischen, übersetzten Namen angezeigt. Garten- und Pflanzennamen sind Bestandteil der Geräte- beziehungsweise Sensorbezeichnung; Details stehen zusätzlich als Attribute zur Verfügung. Änderungen an Planty-Datensätzen werden spätestens mit dem nächsten Abruf (alle 15 Minuten) übernommen.
 
 ## Installation über HACS
 

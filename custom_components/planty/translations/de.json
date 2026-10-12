@@ -1,0 +1,72 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mit Planty verbinden",
+        "description": "Gib die URL deines Planty-Servers und ein schreibgeschütztes Integrationstoken ein.",
+        "data": {
+          "url": "Planty-Server-URL",
+          "token": "Schreibgeschütztes Token"
+        },
+        "data_description": {
+          "url": "Nur den Ursprung angeben, zum Beispiel https://planty.example.org",
+          "token": "Erstelle das Token in Planty unter Einstellungen → Home Assistant."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Planty-Token aktualisieren",
+        "description": "Das konfigurierte Token ist ungültig oder wurde widerrufen. Gib ein neues schreibgeschütztes Token ein.",
+        "data": {
+          "token": "Neues schreibgeschütztes Token"
+        }
+      }
+    },
+    "error": {
+      "invalid_url": "Gib die Planty-Serveradresse ohne Pfad ein.",
+      "invalid_auth": "Das Token ist ungültig oder wurde widerrufen.",
+      "cannot_connect": "Der Planty-Server ist nicht erreichbar.",
+      "invalid_response": "Der Planty-Server hat eine unerwartete Antwort zurückgegeben."
+    },
+    "abort": {
+      "already_configured": "Dieser Planty-Server ist bereits eingerichtet."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "garden_count": { "name": "Gärten" },
+      "place_count": { "name": "Pflanzorte" },
+      "plant_count": { "name": "Aktive Pflanzen" },
+      "open_task_count": { "name": "Offene Aufgaben" },
+      "due_today_task_count": { "name": "Heute fällige Aufgaben" },
+      "overdue_task_count": { "name": "Überfällige Aufgaben" },
+      "next_task_due": { "name": "Nächste Aufgabe fällig" },
+      "next_task_name": { "name": "Nächste Aufgabe" },
+      "garden_overview": { "name": "Gartenübersicht" },
+      "place_kind": {
+        "name": "Pflanzort: {place}",
+        "state": {
+          "Beet": "Beet",
+          "Topf": "Topf",
+          "Kübel": "Kübel",
+          "Balkonkasten": "Balkonkasten",
+          "Einzelpflanze": "Einzelpflanze",
+          "Sonstiges": "Sonstiges"
+        }
+      },
+      "plant_phase": {
+        "name": "Pflanze: {plant}",
+        "state": {
+          "sow_pending": "Aussaat geplant",
+          "raising": "Anzucht",
+          "plant_pending": "Pflanzung geplant",
+          "planted": "Gepflanzt",
+          "uprooted": "Entfernt",
+          "overwintering": "Überwintert",
+          "completed": "Abgeschlossen",
+          "unknown": "Unbekannt"
+        }
+      },
+      "task_due": { "name": "Aufgabe: {task}" }
+    }
+  }
+}

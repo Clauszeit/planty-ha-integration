@@ -8,11 +8,16 @@ from _support import prepare_imports
 prepare_imports()
 
 from custom_components.planty.data import (
+    count_tasks_due_today,
     count_overdue_tasks,
     get_active_gardens,
     get_active_plants,
+    get_active_places,
     get_next_task,
     get_open_tasks,
+    get_records_for_garden,
+    get_visible_plants,
+    get_visible_tasks,
 )
 
 
@@ -22,6 +27,11 @@ class SnapshotSummaryTest(unittest.TestCase):
     def setUp(self):
         self.snapshot = {
             "gardens": [{"id": "g1"}, {"id": "g2", "archived": True}],
+            "places": [
+                {"id": "l1", "garden_id": "g1"},
+                {"id": "l2", "garden_id": "g1", "archived": True},
+                {"id": "l3", "garden_id": "g2"},
+            ],
             "plants": [
                 {"id": "p1", "phase": "planted"},
                 {"id": "p2", "phase": "completed"},
@@ -50,6 +60,18 @@ class SnapshotSummaryTest(unittest.TestCase):
         empty_snapshot = {}
         self.assertIsNone(get_next_task(empty_snapshot))
         self.assertEqual(count_overdue_tasks(empty_snapshot, date(2026, 10, 12)), 0)
+
+    def test_detail_collections_filter_archived_and_group_by_garden(self):
+        self.assertEqual([place["id"] for place in get_active_places(self.snapshot)], ["l1", "l3"])
+        self.assertEqual(
+            [place["id"] for place in get_records_for_garden(self.snapshot, "places", "g1")],
+            ["l1"],
+        )
+        self.assertEqual([plant["id"] for plant in get_visible_plants(self.snapshot)], ["p1", "p2"])
+        self.assertEqual([task["id"] for task in get_visible_tasks(self.snapshot)], ["t1", "t2", "t3", "t4"])
+
+    def test_due_today_count_ignores_closed_and_invalid_dates(self):
+        self.assertEqual(count_tasks_due_today(self.snapshot, date(2026, 10, 12)), 1)
 
 
 if __name__ == "__main__":
