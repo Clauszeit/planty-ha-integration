@@ -4,6 +4,11 @@
 
 - Ergänzt den GitHub-Actions-Workflow für Tests, Coverage-Bericht und SonarQube-Analyse.
 
+## 0.6.0 – 2026-10-12
+
+- Pflanzensensoren und Pflanzortlisten geben `variety_group_id` und `variety_group_size` aus dem Planty-Snapshot weiter. Dashboard-Karten können Sorten damit gemeinsam anzeigen.
+- Gemeinsame Aufgaben zeigen `plant_ids`, Sorten und verfügbare Pflanzen-Entitäts-IDs in `plants`. Der Name der nächsten Aufgabe nennt die Sortenanzahl.
+
 ## 0.5.0 – 2026-10-12
 
 - Zeigt die Pflanze bei der nächsten Aufgabe direkt an und stellt deren Home-Assistant-Entität für Dashboards und Automationen bereit.

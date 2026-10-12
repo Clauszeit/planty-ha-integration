@@ -39,9 +39,14 @@ PLANT_PHASES = (
     "completed",
     "unknown",
 )
+VARIETY_GROUP_ID = "variety_group_id"
+VARIETY_GROUP_SIZE = "variety_group_size"
+TASK_PLANT_IDS = "plant_ids"
 DETAIL_ATTRIBUTE_KEYS = (
     "name",
     "variety",
+    VARIETY_GROUP_ID,
+    VARIETY_GROUP_SIZE,
     "scientific_name",
     "quantity",
     "phase",
@@ -212,10 +217,21 @@ def _details(record: dict, keys: tuple[str, ...]) -> dict:
     }
 
 
+def _task_plant_label(snapshot: dict, task: dict) -> str | None:
+    plant_ids = task.get(TASK_PLANT_IDS)
+    if isinstance(plant_ids, list) and plant_ids:
+        plant = get_record_by_id(snapshot, "plants", plant_ids[0])
+        if plant and plant.get("name"):
+            return f"{plant['name']} · {len(plant_ids)} Sorten"
+    plant = get_record_by_id(snapshot, "plants", task.get("plant_id"))
+    return (plant or {}).get("name")
+
+
 def _task_attributes(
     snapshot: dict,
     task: dict,
     plant_entity_id: str | None = None,
+    plant_entity_ids: dict[str, str] | None = None,
 ) -> dict:
     """Collect related garden, plant and place names for a task."""
     attributes = _details(task, TASK_ATTRIBUTE_KEYS)
@@ -234,6 +250,20 @@ def _task_attributes(
         attributes["plant_entity_id"] = plant_entity_id
     if plant and plant.get("name"):
         attributes["plant"] = plant["name"]
+    group_ids = task.get(TASK_PLANT_IDS)
+    if isinstance(group_ids, list) and len(group_ids) >= 2:
+        linked_plants = [get_record_by_id(snapshot, "plants", identifier) for identifier in group_ids]
+        attributes[TASK_PLANT_IDS] = group_ids
+        attributes["plants"] = [
+            {"plant_id": record["id"], "name": record.get("name"),
+             "variety": record.get("variety"),
+             "entity_id": (plant_entity_ids or {}).get(record["id"])}
+            for record in linked_plants if record
+        ]
+        if linked_plants and linked_plants[0]:
+            attributes["plant"] = linked_plants[0].get("name")
+            if linked_plants[0].get(VARIETY_GROUP_ID):
+                attributes[VARIETY_GROUP_ID] = linked_plants[0][VARIETY_GROUP_ID]
     if place and place.get("name"):
         attributes["place"] = place["name"]
     return attributes
@@ -337,8 +367,7 @@ class PlantySummarySensor(PlantyCoordinatorSensor):
             if task is None:
                 return None
             title = task.get("title") or task.get("kind")
-            plant = get_record_by_id(snapshot, "plants", task.get("plant_id"))
-            plant_name = (plant or {}).get("name")
+            plant_name = _task_plant_label(snapshot, task)
             if title and plant_name:
                 return f"{title} · {plant_name}"[:255]
             return title
@@ -508,6 +537,8 @@ class PlantyPlaceSensor(PlantyCoordinatorSensor):
                 "variety": plant.get("variety"),
                 "quantity": plant.get("quantity", 1),
                 "phase": plant.get("phase"),
+                VARIETY_GROUP_ID: plant.get(VARIETY_GROUP_ID),
+                VARIETY_GROUP_SIZE: plant.get(VARIETY_GROUP_SIZE),
             }
             for plant in plants
         ]
@@ -593,10 +624,7 @@ class PlantyTaskSensor(PlantyCoordinatorSensor):
         task = self._task() or {}
         title = task.get("title") or task.get("kind") or "Task"
         due_date = task.get("due_date") or ""
-        plant = get_record_by_id(
-            self.coordinator.data or {}, "plants", task.get("plant_id")
-        )
-        plant_name = (plant or {}).get("name")
+        plant_name = _task_plant_label(self.coordinator.data or {}, task)
         detail = f" · {plant_name}" if plant_name else ""
         self._attr_translation_placeholders = {
             "task": f"{title}{detail} · {due_date}".strip(" ·")[:160]
@@ -628,6 +656,8 @@ class PlantyTaskSensor(PlantyCoordinatorSensor):
             self.coordinator.data or {},
             task,
             self._plant_entity_id(task.get("plant_id")),
+            {identifier: entity_id for identifier in task.get(TASK_PLANT_IDS, [])
+             if (entity_id := self._plant_entity_id(identifier))},
         )
 
 

@@ -89,11 +89,13 @@ Zusätzlich gibt es je Datensatz einen Detail-Sensor:
 | Datensatz | Zustand | Attribute (sofern in Planty gepflegt) |
 | --- | --- | --- |
 | Garten | Gartenname | `description`, `access`, `owner_username`, `plan_width_m`, `place_count`, `active_plant_count`, `open_task_count`, `due_today_task_count`, `overdue_task_count`, `next_task`, `next_task_due` |
-| Pflanzort | Typ, etwa Beet, Topf oder Kübel | `kind`, `location`, `light`, `area`, `soil`, `notes`, `garden`, `plants` mit Name, Sorte, Menge und Phase |
-| Pflanze | Wachstumsphase | `name`, `variety`, `scientific_name`, `quantity`, `phase`, `season`, `season_year`, `permanent`, `winter_at_location`, `start_date`, `purchased_date`, `seed_date`, `start_comment`, `source`, `notes`, `garden`, `place`, `planned_place`, bis zu fünf `recent_actions` |
-| Aufgabe | Fälligkeitsdatum | `task_id`, `title`, `kind`, `status`, `time`, `repeat_days`, `repeat_end`, `last_done`, `fertilizer_product`, `dosage`, `notes`, `due_date`, `garden`, `plant`, `place`, `plant_id`, `plant_entity_id` |
+| Pflanzort | Typ, etwa Beet, Topf oder Kübel | `kind`, `location`, `light`, `area`, `soil`, `notes`, `garden`, `plants` mit Name, Sorte, Menge, Phase und Gruppenkennung |
+| Pflanze | Wachstumsphase | `name`, `variety`, `variety_group_id`, `variety_group_size`, `scientific_name`, `quantity`, `phase`, `season`, `season_year`, `permanent`, `winter_at_location`, `start_date`, `purchased_date`, `seed_date`, `start_comment`, `source`, `notes`, `garden`, `place`, `planned_place`, bis zu fünf `recent_actions` |
+| Aufgabe | Fälligkeitsdatum | `task_id`, `title`, `kind`, `status`, `time`, `repeat_days`, `repeat_end`, `last_done`, `fertilizer_product`, `dosage`, `notes`, `due_date`, `garden`, `plant`, `place`, `plant_id`, `plant_entity_id`; bei gemeinsamen Aufgaben auch `plant_ids`, `plants`, `variety_group_id` |
 
 Attribute, die Planty nicht geliefert oder nicht gepflegt hat, können fehlen. Datumszustände sind Home-Assistant-Datumswerte. Pflanzenphasen erscheinen als übersetzter Zustand (zum Beispiel **Gepflanzt**); Pflanzorttypen ebenfalls (zum Beispiel **Beet**). In Vorlagen und Automationen solltest du bevorzugt Attribute wie `plant`, `place` und `garden` verwenden statt interne Datenbank-IDs. `plant_id` und `task_id` sind vor allem für stabile Verknüpfungen nützlich.
+
+Ab Planty 0.46.0 tragen zusammengehörige Sorten dieselbe `variety_group_id` und `variety_group_size` als Sensorattribute. Die Kennung beschreibt die aktuelle Gruppierung nach Garten, Pflanzenname und Abschlussstatus; beim Umbenennen oder Abschließen kann sie wechseln. Eine gemeinsame Aufgabe enthält `plant_ids` und `plants` mit Sorte und, sofern registriert, `entity_id` je Pflanze. Ältere Planty-Versionen liefern diese zusätzlichen Attribute noch nicht.
 
 Die Integration aktualisiert den gemeinsamen Planty-Snapshot alle **15 Minuten**. Änderungen an Namen, Aufgaben und Attributen werden daher spätestens beim nächsten erfolgreichen Abruf in Home Assistant sichtbar.
 

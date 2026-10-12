@@ -114,6 +114,27 @@ class SensorDetailTest(unittest.TestCase):
         plant._handle_coordinator_update()
         self.assertEqual(plant._attr_translation_placeholders["plant"], "Cocktailtomate (Black Cherry)")
 
+    def test_variety_group_and_shared_task_are_exposed_for_dashboards(self):
+        first = self.snapshot["plants"][0]
+        first.update(name="Knoblauch", variety="Ljubascha", variety_group_id="group-1", variety_group_size=2)
+        self.snapshot["plants"].append({**first, "id": "plant-2", "variety": "Garcua"})
+        task_data = self.snapshot["tasks"][0]
+        task_data.pop("plant_id")
+        task_data["plant_ids"] = ["plant-1", "plant-2"]
+        plant = PlantyPlantSensor(self.coordinator, self.entry, "garden-1", "plant-1")
+        place = PlantyPlaceSensor(self.coordinator, self.entry, "garden-1", "place-1")
+        task = PlantyTaskSensor(self.coordinator, self.entry, "garden-1", "task-1")
+        task.hass = self._hass_with_plant_entity()
+        self.assertEqual(plant.extra_state_attributes["variety_group_id"], "group-1")
+        self.assertEqual(plant.extra_state_attributes["variety_group_size"], 2)
+        self.assertEqual(place.extra_state_attributes["plants"][1]["variety_group_id"], "group-1")
+        attributes = task.extra_state_attributes
+        self.assertEqual(attributes["plant_ids"], ["plant-1", "plant-2"])
+        self.assertEqual([record["variety"] for record in attributes["plants"]], ["Ljubascha", "Garcua"])
+        self.assertEqual(attributes["plants"][0]["entity_id"], "sensor.tomate_wachstumsphase")
+        self.assertEqual(attributes["variety_group_id"], "group-1")
+        self.assertIn("2 Sorten", task._attr_translation_placeholders["task"])
+
     def test_place_kind_is_mapped_to_a_translatable_option(self):
         self.snapshot["places"][0]["kind"] = "unsupported kind"
         place = PlantyPlaceSensor(self.coordinator, self.entry, "garden-1", "place-1")
