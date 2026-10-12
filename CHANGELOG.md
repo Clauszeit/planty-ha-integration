@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Ergänzt den GitHub-Actions-Workflow für Tests, Coverage-Bericht und SonarQube-Analyse.
+
 ## 0.2.0 – 2026-10-12
 
 - Ergänzt Einrichtung, API-Client, Snapshot-Koordination und Sensoren für Gärten und Pflegeaufgaben.
