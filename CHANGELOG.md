@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0 – 2026-10-12
+
+- Das Aktualisierungsintervall des Planty-Snapshots lässt sich in den Optionen der Integration zwischen 1 Minute und 24 Stunden einstellen. Standard sind 15 Minuten.
+
 ## Unreleased
 
 - Ergänzt den GitHub-Actions-Workflow für Tests, Coverage-Bericht und SonarQube-Analyse.

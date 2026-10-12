@@ -83,6 +83,14 @@ class HacsMetadataTest(unittest.TestCase):
             url_description = translations["config"]["step"]["user"]["data_description"]["url"]
             self.assertNotRegex(url_description, r"https?://")
 
+    def test_options_translations_describe_the_refresh_interval(self):
+        for language in ("de", "en"):
+            translations = json.loads(
+                (REPOSITORY_ROOT / f"custom_components/planty/translations/{language}.json").read_text()
+            )
+            option_fields = translations["options"]["step"]["init"]["data"]
+            self.assertIn("scan_interval", option_fields)
+
     def test_custom_integration_does_not_use_core_strings_file(self):
         self.assertFalse((REPOSITORY_ROOT / "custom_components/planty/strings.json").exists())
 

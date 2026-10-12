@@ -11,7 +11,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import PlantyApi, PlantyApiError, PlantyAuthenticationError
-from .const import CONF_TOKEN, CONF_URL, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import CONF_TOKEN, CONF_URL, DOMAIN, scan_interval_from_options
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class PlantyDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             hass,
             logger=LOGGER,
             name=DOMAIN,
-            update_interval=DEFAULT_SCAN_INTERVAL,
+            update_interval=scan_interval_from_options(entry.options),
         )
 
     async def _async_update_data(self) -> dict:

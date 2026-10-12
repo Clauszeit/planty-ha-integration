@@ -97,7 +97,7 @@ Attribute, die Planty nicht geliefert oder nicht gepflegt hat, können fehlen. D
 
 Ab Planty 0.46.0 tragen zusammengehörige Sorten dieselbe `variety_group_id` und `variety_group_size` als Sensorattribute. Die Kennung beschreibt die aktuelle Gruppierung nach Garten, Pflanzenname und Abschlussstatus; beim Umbenennen oder Abschließen kann sie wechseln. Eine gemeinsame Aufgabe enthält `plant_ids` und `plants` mit Sorte und, sofern registriert, `entity_id` je Pflanze. Ältere Planty-Versionen liefern diese zusätzlichen Attribute noch nicht.
 
-Die Integration aktualisiert den gemeinsamen Planty-Snapshot alle **15 Minuten**. Änderungen an Namen, Aufgaben und Attributen werden daher spätestens beim nächsten erfolgreichen Abruf in Home Assistant sichtbar.
+Die Integration aktualisiert den gemeinsamen Planty-Snapshot standardmäßig alle **15 Minuten**. Das Intervall kannst du in Home Assistant unter **Einstellungen → Geräte & Dienste → Planty → Konfigurieren** zwischen **1 Minute und 24 Stunden** einstellen. Änderungen werden spätestens beim nächsten erfolgreichen Abruf sichtbar.
 
 ## Sensoren im Dashboard verwenden
 
@@ -163,7 +163,7 @@ Der numerische Trigger reagiert auf den Wechsel von `0` auf einen Wert größer 
 | **Token ungültig oder widerrufen** | In Planty unter **Einstellungen → Home Assistant** prüfen, ob das Token noch aktiv ist. Ein neues Token erstellen und den Planty-Eintrag in Home Assistant neu authentifizieren. |
 | **Unerwartete Antwort** | Prüfen, ob die URL auf Planty zeigt und der Proxy `/api/auth/me` und `/api/snapshot` an den API-Dienst weiterleitet. Nicht `/api` an die URL anhängen. |
 | **Garten oder Datensensor fehlt** | In Planty mit demselben Konto anmelden und prüfen, ob der Garten zugänglich und nicht archiviert ist. Freigegebene Gärten erscheinen nur entsprechend den Planty-Berechtigungen. |
-| **Änderung ist noch nicht sichtbar** | Bis zum nächsten Abruf warten (höchstens 15 Minuten) oder unter **Einstellungen → Geräte & Dienste → Planty** die Integration neu laden. |
+| **Änderung ist noch nicht sichtbar** | Bis zum nächsten Abruf gemäß eingestelltem Intervall warten oder unter **Einstellungen → Geräte & Dienste → Planty** die Integration neu laden. |
 | **Sensor nicht verfügbar** | Planty-API-Erreichbarkeit, Freigabe und Archivstatus prüfen. Nach einem Abruffehler kann die Integration die zuletzt empfangenen Daten behalten, meldet betroffene Detail-Sensoren aber als nicht verfügbar. |
 
 Home-Assistant-Logs findest du unter **Einstellungen → System → Protokolle**. Suche dort nach `planty` und den Namen der betreffenden Entität oder Integration.

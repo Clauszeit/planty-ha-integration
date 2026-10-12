@@ -31,6 +31,17 @@
       "already_configured": "Dieser Planty-Server ist bereits eingerichtet."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Aktualisierungsintervall",
+        "description": "Lege fest, wie oft Home Assistant den Planty-Snapshot abruft.",
+        "data": {
+          "scan_interval": "Intervall in Minuten"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "garden_count": { "name": "Gärten" },

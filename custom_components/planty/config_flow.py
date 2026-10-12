@@ -6,7 +6,14 @@ import probatio
 
 from homeassistant import config_entries
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, TextSelectorType
+from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
+    TextSelector,
+    TextSelectorConfig,
+    TextSelectorType,
+)
 
 from .api import (
     PlantyApi,
@@ -15,13 +22,26 @@ from .api import (
     PlantyInvalidResponseError,
     normalize_base_url,
 )
-from .const import CONF_TOKEN, CONF_URL, DOMAIN
+from .const import (
+    CONF_SCAN_INTERVAL,
+    CONF_TOKEN,
+    CONF_URL,
+    DEFAULT_SCAN_INTERVAL_MINUTES,
+    DOMAIN,
+    MAX_SCAN_INTERVAL_MINUTES,
+    MIN_SCAN_INTERVAL_MINUTES,
+)
 
 
 class PlantyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Configure a Planty server and its read-only API token."""
 
     VERSION = 1
+
+    @staticmethod
+    def async_get_options_flow(config_entry):
+        """Return the options flow for an existing Planty entry."""
+        return PlantyOptionsFlowHandler()
 
     async def async_step_user(self, user_input: dict | None = None):
         """Validate the Planty URL and token before creating the entry."""
@@ -104,3 +124,31 @@ class PlantyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="reauth_confirm", data_schema=schema, errors=errors
         )
+
+
+class PlantyOptionsFlowHandler(config_entries.OptionsFlow):
+    """Configure the snapshot polling interval."""
+
+    async def async_step_init(self, user_input: dict | None = None):
+        """Save or display the polling interval in minutes."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        schema = probatio.Schema(
+            {
+                probatio.Required(
+                    CONF_SCAN_INTERVAL,
+                    default=self.config_entry.options.get(
+                        CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MINUTES
+                    ),
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=MIN_SCAN_INTERVAL_MINUTES,
+                        max=MAX_SCAN_INTERVAL_MINUTES,
+                        step=1,
+                        mode=NumberSelectorMode.BOX,
+                    )
+                )
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema)
