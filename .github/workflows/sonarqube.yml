@@ -13,9 +13,29 @@ permissions:
   pull-requests: read
 
 jobs:
-  test-and-scan:
-    name: Tests and SonarQube analysis
+  pull-request-tests:
+    name: Pull request tests
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install coverage tool
+        run: python -m pip install --disable-pip-version-check coverage
+
+      - name: Run tests and create coverage report
+        run: bash scripts/test.sh
+
+  main-sonarqube-analysis:
+    name: Main branch tests and SonarQube analysis
+    if: github.event_name == 'push'
+    runs-on: [self-hosted, linux, x64, sonar]
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -34,7 +54,6 @@ jobs:
         run: bash scripts/test.sh
 
       - name: Run SonarQube analysis
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: SonarSource/sonarqube-scan-action@v8.3.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
