@@ -29,3 +29,7 @@ Installiere für den lokalen Testlauf zunächst `coverage` mit `python -m pip in
 - `VERSION` ist die maßgebliche Projektversion.
 - `CHANGELOG.md` dokumentiert Änderungen je Version.
 - `AGENTS.md` enthält die verbindlichen Beitrags- und Sicherheitsregeln.
+
+## Lizenz
+
+Planty Home Assistant Integration steht unter der GNU Affero General Public License v3.0 (AGPL-3.0-only). Den vollständigen Lizenztext findest du in [`LICENSE`](LICENSE). Die AGPL erlaubt auch kommerzielle Nutzung und enthält zusätzliche Quellcode-Angebotspflichten für geänderte Software, mit der Nutzer über ein Netzwerk interagieren.

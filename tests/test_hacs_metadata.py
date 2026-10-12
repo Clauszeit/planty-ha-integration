@@ -55,3 +55,10 @@ class HacsMetadataTest(unittest.TestCase):
 
     def test_custom_integration_does_not_use_core_strings_file(self):
         self.assertFalse((REPOSITORY_ROOT / "custom_components/planty/strings.json").exists())
+
+    def test_repository_license_is_gnu_agpl_v3(self):
+        license_text = (REPOSITORY_ROOT / "LICENSE").read_text()
+        readme = (REPOSITORY_ROOT / "README.md").read_text()
+
+        self.assertIn("GNU AFFERO GENERAL PUBLIC LICENSE", license_text[:100])
+        self.assertIn("AGPL-3.0-only", readme)
