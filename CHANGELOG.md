@@ -4,6 +4,10 @@
 
 - Ergänzt den GitHub-Actions-Workflow für Tests, Coverage-Bericht und SonarQube-Analyse.
 
+## 0.4.1 – 2026-10-12
+
+- Behebt die Home-Assistant-Metadatenvalidierung und verwendet gültige, übersetzbare Pflanzort-Typen.
+
 ## 0.4.0 – 2026-10-12
 
 - Ergänzt übersetzte und eindeutige Sensoren mit Detaildaten je Garten, Pflanzort, Pflanze und Pflegeaufgabe.

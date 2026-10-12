@@ -12,7 +12,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN
+from .const import DOMAIN, PLACE_KIND_OPTIONS, PLACE_KIND_VALUES
 from .coordinator import PlantyDataUpdateCoordinator
 from .data import (
     count_overdue_tasks,
@@ -38,7 +38,6 @@ PLANT_PHASES = (
     "completed",
     "unknown",
 )
-PLACE_KINDS = ("Beet", "Topf", "Kübel", "Balkonkasten", "Einzelpflanze", "Sonstiges")
 DETAIL_ATTRIBUTE_KEYS = (
     "name",
     "variety",
@@ -104,7 +103,7 @@ PLACE_DESCRIPTION = SensorEntityDescription(
     key="place_kind",
     translation_key="place_kind",
     device_class=SensorDeviceClass.ENUM,
-    options=PLACE_KINDS,
+    options=PLACE_KIND_OPTIONS,
     icon="mdi:map-marker",
 )
 PLANT_DESCRIPTION = SensorEntityDescription(
@@ -434,8 +433,7 @@ class PlantyPlaceSensor(PlantyCoordinatorSensor):
     def _update_translation_placeholders(self) -> None:
         place = self._place()
         place_name = (place or {}).get("name") or ""
-        place_kind = (place or {}).get("kind") or ""
-        self._attr_translation_placeholders = {"place": f"{place_name} · {place_kind}".strip(" ·")}
+        self._attr_translation_placeholders = {"place": place_name}
 
     @property
     def native_value(self) -> str | None:
@@ -444,7 +442,7 @@ class PlantyPlaceSensor(PlantyCoordinatorSensor):
         if not place:
             return None
         place_kind = place.get("kind", "Sonstiges")
-        return place_kind if place_kind in PLACE_KINDS else "Sonstiges"
+        return PLACE_KIND_VALUES.get(place_kind, "sonstiges")
 
     @property
     def available(self) -> bool:
@@ -457,7 +455,7 @@ class PlantyPlaceSensor(PlantyCoordinatorSensor):
         snapshot = self.coordinator.data or {}
         if not place:
             return None
-        attributes = _details(place, ("location", "light", "area", "soil", "notes"))
+        attributes = _details(place, ("kind", "location", "light", "area", "soil", "notes"))
         garden = self._garden()
         if garden and garden.get("name"):
             attributes["garden"] = garden["name"]

@@ -9,7 +9,7 @@
           "token": "Schreibgeschütztes Token"
         },
         "data_description": {
-          "url": "Nur den Ursprung angeben, zum Beispiel https://planty.example.org",
+          "url": "Gib den Serverursprung ohne Pfad und abschließenden Schrägstrich an.",
           "token": "Erstelle das Token in Planty unter Einstellungen → Home Assistant."
         }
       },
@@ -45,12 +45,12 @@
       "place_kind": {
         "name": "Pflanzort: {place}",
         "state": {
-          "Beet": "Beet",
-          "Topf": "Topf",
-          "Kübel": "Kübel",
-          "Balkonkasten": "Balkonkasten",
-          "Einzelpflanze": "Einzelpflanze",
-          "Sonstiges": "Sonstiges"
+          "beet": "Beet",
+          "topf": "Topf",
+          "kuebel": "Kübel",
+          "balkonkasten": "Balkonkasten",
+          "einzelpflanze": "Einzelpflanze",
+          "sonstiges": "Sonstiges"
         }
       },
       "plant_phase": {

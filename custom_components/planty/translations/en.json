@@ -9,7 +9,7 @@
           "token": "Read-only token"
         },
         "data_description": {
-          "url": "The origin only, for example https://planty.example.org",
+          "url": "Enter the server origin without a path or trailing slash.",
           "token": "Create this token in Planty under Settings → Home Assistant."
         }
       },
@@ -45,12 +45,12 @@
       "place_kind": {
         "name": "Growing place: {place}",
         "state": {
-          "Beet": "Garden bed",
-          "Topf": "Pot",
-          "Kübel": "Planter",
-          "Balkonkasten": "Window box",
-          "Einzelpflanze": "Single plant",
-          "Sonstiges": "Other"
+          "beet": "Garden bed",
+          "topf": "Pot",
+          "kuebel": "Planter",
+          "balkonkasten": "Window box",
+          "einzelpflanze": "Single plant",
+          "sonstiges": "Other"
         }
       },
       "plant_phase": {

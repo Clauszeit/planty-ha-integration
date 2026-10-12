@@ -1,6 +1,7 @@
 """Validate Home Assistant and HACS repository metadata."""
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -25,9 +26,12 @@ class HacsMetadataTest(unittest.TestCase):
         manifest = json.loads(
             (REPOSITORY_ROOT / "custom_components/planty/manifest.json").read_text()
         )
+        manifest_keys = list(manifest)
         required_fields = {"domain", "documentation", "issue_tracker", "codeowners", "name", "version"}
 
         self.assertTrue(required_fields.issubset(manifest))
+        self.assertEqual(manifest_keys[:2], ["domain", "name"])
+        self.assertEqual(manifest_keys[2:], sorted(manifest_keys[2:]))
         self.assertEqual(manifest["domain"], "planty")
         self.assertEqual(manifest["version"], (REPOSITORY_ROOT / "VERSION").read_text().strip())
 
@@ -52,6 +56,32 @@ class HacsMetadataTest(unittest.TestCase):
                 "task_due",
             ):
                 self.assertIn(key, sensors)
+
+    def test_place_kind_translation_keys_match_enum_options(self):
+        place_kind_options = {
+            "beet",
+            "topf",
+            "kuebel",
+            "balkonkasten",
+            "einzelpflanze",
+            "sonstiges",
+        }
+
+        for language in ("de", "en"):
+            translations = json.loads(
+                (REPOSITORY_ROOT / f"custom_components/planty/translations/{language}.json").read_text()
+            )
+            place_kinds = translations["entity"]["sensor"]["place_kind"]["state"]
+            self.assertEqual(set(place_kinds), place_kind_options)
+            self.assertTrue(all(re.fullmatch(r"[a-z0-9-]+", key) for key in place_kinds))
+
+    def test_translations_do_not_embed_urls_in_descriptions(self):
+        for language in ("de", "en"):
+            translations = json.loads(
+                (REPOSITORY_ROOT / f"custom_components/planty/translations/{language}.json").read_text()
+            )
+            url_description = translations["config"]["step"]["user"]["data_description"]["url"]
+            self.assertNotRegex(url_description, r"https?://")
 
     def test_custom_integration_does_not_use_core_strings_file(self):
         self.assertFalse((REPOSITORY_ROOT / "custom_components/planty/strings.json").exists())

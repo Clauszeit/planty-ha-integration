@@ -64,19 +64,26 @@ class SensorDetailTest(unittest.TestCase):
 
         self.assertEqual(garden.native_value, "Hinterer Garten")
         self.assertEqual(garden.extra_state_attributes["active_plant_count"], 1)
-        self.assertEqual(place.native_value, "Beet")
+        self.assertEqual(place.native_value, "beet")
         self.assertEqual(place.extra_state_attributes["light"], "Sonne")
         self.assertEqual(plant.native_value, "planted")
         self.assertEqual(plant.extra_state_attributes["variety"], "Black Cherry")
         self.assertEqual(task.native_value.isoformat(), "2026-10-12")
         self.assertEqual(task.extra_state_attributes["plant"], "Tomate")
         self.assertEqual(task.extra_state_attributes["fertilizer_product"], "Kompost")
-        self.assertEqual(place._attr_translation_placeholders["place"], "Hochbeet Nord · Beet")
+        self.assertEqual(place._attr_translation_placeholders["place"], "Hochbeet Nord")
+        self.assertEqual(place.extra_state_attributes["kind"], "Beet")
         self.assertEqual(plant._attr_translation_placeholders["plant"], "Tomate (Black Cherry)")
         self.assertIn("Tomaten düngen", task._attr_translation_placeholders["task"])
         self.snapshot["plants"][0]["name"] = "Cocktailtomate"
         plant._handle_coordinator_update()
         self.assertEqual(plant._attr_translation_placeholders["plant"], "Cocktailtomate (Black Cherry)")
+
+    def test_place_kind_is_mapped_to_a_translatable_option(self):
+        self.snapshot["places"][0]["kind"] = "unsupported kind"
+        place = PlantyPlaceSensor(self.coordinator, self.entry, "garden-1", "place-1")
+
+        self.assertEqual(place.native_value, "sonstiges")
 
 
 if __name__ == "__main__":
