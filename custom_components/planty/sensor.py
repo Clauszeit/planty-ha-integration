@@ -227,6 +227,28 @@ def _task_plant_label(snapshot: dict, task: dict) -> str | None:
     return (plant or {}).get("name")
 
 
+def _shared_task_plant_attributes(snapshot: dict, group_ids: object,
+                                  plant_entity_ids: dict[str, str] | None) -> dict:
+    if not isinstance(group_ids, list) or len(group_ids) < 2:
+        return {}
+    linked_plants = [get_record_by_id(snapshot, "plants", identifier) for identifier in group_ids]
+    attributes = {
+        TASK_PLANT_IDS: group_ids,
+        "plants": [
+            {"plant_id": record["id"], "name": record.get("name"),
+             "variety": record.get("variety"),
+             "entity_id": (plant_entity_ids or {}).get(record["id"])}
+            for record in linked_plants if record
+        ],
+    }
+    first_plant = linked_plants[0]
+    if first_plant:
+        attributes["plant"] = first_plant.get("name")
+        if first_plant.get(VARIETY_GROUP_ID):
+            attributes[VARIETY_GROUP_ID] = first_plant[VARIETY_GROUP_ID]
+    return attributes
+
+
 def _task_attributes(
     snapshot: dict,
     task: dict,
@@ -250,20 +272,7 @@ def _task_attributes(
         attributes["plant_entity_id"] = plant_entity_id
     if plant and plant.get("name"):
         attributes["plant"] = plant["name"]
-    group_ids = task.get(TASK_PLANT_IDS)
-    if isinstance(group_ids, list) and len(group_ids) >= 2:
-        linked_plants = [get_record_by_id(snapshot, "plants", identifier) for identifier in group_ids]
-        attributes[TASK_PLANT_IDS] = group_ids
-        attributes["plants"] = [
-            {"plant_id": record["id"], "name": record.get("name"),
-             "variety": record.get("variety"),
-             "entity_id": (plant_entity_ids or {}).get(record["id"])}
-            for record in linked_plants if record
-        ]
-        if linked_plants and linked_plants[0]:
-            attributes["plant"] = linked_plants[0].get("name")
-            if linked_plants[0].get(VARIETY_GROUP_ID):
-                attributes[VARIETY_GROUP_ID] = linked_plants[0][VARIETY_GROUP_ID]
+    attributes.update(_shared_task_plant_attributes(snapshot, task.get(TASK_PLANT_IDS), plant_entity_ids))
     if place and place.get("name"):
         attributes["place"] = place["name"]
     return attributes
@@ -656,7 +665,7 @@ class PlantyTaskSensor(PlantyCoordinatorSensor):
             self.coordinator.data or {},
             task,
             self._plant_entity_id(task.get("plant_id")),
-            {identifier: entity_id for identifier in task.get(TASK_PLANT_IDS, [])
+            {identifier: entity_id for identifier in (task.get(TASK_PLANT_IDS) or [])
              if (entity_id := self._plant_entity_id(identifier))},
         )
 

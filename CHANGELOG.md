@@ -4,6 +4,10 @@
 
 - Ergänzt den GitHub-Actions-Workflow für Tests, Coverage-Bericht und SonarQube-Analyse.
 
+## 0.6.1 – 2026-10-12
+
+- Gemeinsame Aufgaben behalten Sortenkennungen auch bei vorübergehend fehlenden Pflanzen im Snapshot; zusätzliche Tests sichern die Dashboard-Attribute ab.
+
 ## 0.6.0 – 2026-10-12
 
 - Pflanzensensoren und Pflanzortlisten geben `variety_group_id` und `variety_group_size` aus dem Planty-Snapshot weiter. Dashboard-Karten können Sorten damit gemeinsam anzeigen.

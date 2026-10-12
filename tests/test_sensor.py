@@ -135,6 +135,30 @@ class SensorDetailTest(unittest.TestCase):
         self.assertEqual(attributes["variety_group_id"], "group-1")
         self.assertIn("2 Sorten", task._attr_translation_placeholders["task"])
 
+    def test_shared_task_keeps_ids_when_a_variety_is_missing(self):
+        task_data = self.snapshot["tasks"][0]
+        task_data.pop("plant_id")
+        task_data["plant_ids"] = ["missing", "plant-1"]
+        task = PlantyTaskSensor(self.coordinator, self.entry, "garden-1", "task-1")
+        attributes = task.extra_state_attributes
+        self.assertEqual(attributes["plant_ids"], ["missing", "plant-1"])
+        self.assertEqual([item["plant_id"] for item in attributes["plants"]], ["plant-1"])
+        self.assertNotIn("plant", attributes)
+        self.assertNotIn("variety_group_id", attributes)
+        self.assertNotIn("2 Sorten", task._attr_translation_placeholders["task"])
+
+    def test_shared_task_without_entity_registry_keeps_varieties(self):
+        task_data = self.snapshot["tasks"][0]
+        task_data.pop("plant_id")
+        task_data["plant_ids"] = ["plant-1", "plant-2"]
+        self.snapshot["plants"].append({**self.snapshot["plants"][0], "id": "plant-2", "variety": "Roma"})
+        task = PlantyTaskSensor(self.coordinator, self.entry, "garden-1", "task-1")
+        attributes = task.extra_state_attributes
+        self.assertEqual([item["variety"] for item in attributes["plants"]], ["Black Cherry", "Roma"])
+        self.assertTrue(all(item["entity_id"] is None for item in attributes["plants"]))
+        self.assertEqual(attributes["plant"], "Tomate")
+        self.assertNotIn("variety_group_id", attributes)
+
     def test_place_kind_is_mapped_to_a_translatable_option(self):
         self.snapshot["places"][0]["kind"] = "unsupported kind"
         place = PlantyPlaceSensor(self.coordinator, self.entry, "garden-1", "place-1")
