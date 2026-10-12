@@ -1,6 +1,7 @@
 """Regression tests for detailed Planty sensor values and names."""
 
 import unittest
+from types import SimpleNamespace
 
 from _support import prepare_sensor_imports
 
@@ -45,6 +46,20 @@ class SensorDetailTest(unittest.TestCase):
         })()
         self.entry = ConfigEntry()
 
+    @staticmethod
+    def _hass_with_plant_entity():
+        """Return a Home Assistant stub with a registered Planty plant sensor."""
+        return SimpleNamespace(
+            entity_registry=SimpleNamespace(
+                async_get_entity_id=lambda platform, domain, unique_id: (
+                    "sensor.tomate_wachstumsphase"
+                    if (platform, domain, unique_id)
+                    == ("sensor", "planty", "entry_plant_plant-1_phase")
+                    else None
+                )
+            )
+        )
+
     def test_summary_exposes_counts_for_places_and_due_today(self):
         values = {
             description.key: PlantySummarySensor(self.coordinator, self.entry, description).native_value
@@ -54,13 +69,28 @@ class SensorDetailTest(unittest.TestCase):
         self.assertEqual(values["place_count"], 1)
         self.assertEqual(values["plant_count"], 1)
         self.assertEqual(values["due_today_task_count"], 1)
-        self.assertEqual(values["next_task_name"], "Tomaten düngen")
+        self.assertEqual(values["next_task_name"], "Tomaten düngen · Tomate")
+        next_task = PlantySummarySensor(
+            self.coordinator,
+            self.entry,
+            next(
+                description
+                for description in SENSOR_DESCRIPTIONS
+                if description.key == "next_task_name"
+            ),
+        )
+        next_task.hass = self._hass_with_plant_entity()
+        self.assertEqual(
+            next_task.extra_state_attributes["plant_entity_id"],
+            "sensor.tomate_wachstumsphase",
+        )
 
     def test_detail_entities_have_distinct_dynamic_names_and_attributes(self):
         garden = PlantyGardenSensor(self.coordinator, self.entry, "garden-1")
         place = PlantyPlaceSensor(self.coordinator, self.entry, "garden-1", "place-1")
         plant = PlantyPlantSensor(self.coordinator, self.entry, "garden-1", "plant-1")
         task = PlantyTaskSensor(self.coordinator, self.entry, "garden-1", "task-1")
+        task.hass = self._hass_with_plant_entity()
 
         self.assertEqual(garden.native_value, "Hinterer Garten")
         self.assertEqual(garden.extra_state_attributes["active_plant_count"], 1)
@@ -70,6 +100,11 @@ class SensorDetailTest(unittest.TestCase):
         self.assertEqual(plant.extra_state_attributes["variety"], "Black Cherry")
         self.assertEqual(task.native_value.isoformat(), "2026-10-12")
         self.assertEqual(task.extra_state_attributes["plant"], "Tomate")
+        self.assertEqual(task.extra_state_attributes["plant_id"], "plant-1")
+        self.assertEqual(
+            task.extra_state_attributes["plant_entity_id"],
+            "sensor.tomate_wachstumsphase",
+        )
         self.assertEqual(task.extra_state_attributes["fertilizer_product"], "Kompost")
         self.assertEqual(place._attr_translation_placeholders["place"], "Hochbeet Nord")
         self.assertEqual(place.extra_state_attributes["kind"], "Beet")

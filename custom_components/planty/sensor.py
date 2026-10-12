@@ -7,6 +7,7 @@ from datetime import date
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -211,7 +212,11 @@ def _details(record: dict, keys: tuple[str, ...]) -> dict:
     }
 
 
-def _task_attributes(snapshot: dict, task: dict) -> dict:
+def _task_attributes(
+    snapshot: dict,
+    task: dict,
+    plant_entity_id: str | None = None,
+) -> dict:
     """Collect related garden, plant and place names for a task."""
     attributes = _details(task, TASK_ATTRIBUTE_KEYS)
     attributes["task_id"] = task.get("id")
@@ -222,6 +227,11 @@ def _task_attributes(snapshot: dict, task: dict) -> dict:
     place = get_record_by_id(snapshot, "places", task.get("place_id"))
     if garden and garden.get("name"):
         attributes["garden"] = garden["name"]
+    plant_id = task.get("plant_id")
+    if isinstance(plant_id, str) and plant_id:
+        attributes["plant_id"] = plant_id
+    if plant_entity_id:
+        attributes["plant_entity_id"] = plant_entity_id
     if plant and plant.get("name"):
         attributes["plant"] = plant["name"]
     if place and place.get("name"):
@@ -246,6 +256,7 @@ class PlantyCoordinatorSensor(CoordinatorEntity, SensorEntity):
         self.entity_description = description
         self._attr_unique_id = unique_id
         self._garden_id = garden_id
+        self._entry_id = entry.entry_id
         self._attr_device_info = _account_device_info(entry)
         if garden_id is not None:
             garden = get_record_by_id(coordinator.data or {}, "gardens", garden_id)
@@ -281,6 +292,17 @@ class PlantyCoordinatorSensor(CoordinatorEntity, SensorEntity):
             and not garden.get("archived")
         )
 
+    def _plant_entity_id(self, plant_id: str | None) -> str | None:
+        """Resolve a related Planty plant sensor through Home Assistant's registry."""
+        if not plant_id:
+            return None
+        hass = getattr(self, "hass", None)
+        if hass is None:
+            return None
+        return er.async_get(hass).async_get_entity_id(
+            "sensor", DOMAIN, _plant_unique_id(self._entry_id, plant_id)
+        )
+
 
 class PlantySummarySensor(PlantyCoordinatorSensor):
     """Expose account-wide counts and the next task."""
@@ -312,7 +334,14 @@ class PlantySummarySensor(PlantyCoordinatorSensor):
             return values[self.entity_description.key]
         task = get_next_task(snapshot)
         if self.entity_description.key == "next_task_name":
-            return task.get("title") if task else None
+            if task is None:
+                return None
+            title = task.get("title") or task.get("kind")
+            plant = get_record_by_id(snapshot, "plants", task.get("plant_id"))
+            plant_name = (plant or {}).get("name")
+            if title and plant_name:
+                return f"{title} · {plant_name}"[:255]
+            return title
         due_date = task.get("due_date") if task else None
         return date.fromisoformat(due_date) if due_date else None
 
@@ -340,13 +369,23 @@ class PlantySummarySensor(PlantyCoordinatorSensor):
         if key == "overdue_task_count":
             return {
                 "overdue_tasks": [
-                    _task_attributes(snapshot, task)
+                    _task_attributes(
+                        snapshot,
+                        task,
+                        self._plant_entity_id(task.get("plant_id")),
+                    )
                     for task in get_overdue_tasks(snapshot, today)[:10]
                 ]
             }
         if key in {"next_task_due", "next_task_name"}:
             task = get_next_task(snapshot)
-            return _task_attributes(snapshot, task) if task else None
+            if task:
+                return _task_attributes(
+                    snapshot,
+                    task,
+                    self._plant_entity_id(task.get("plant_id")),
+                )
+            return None
         return None
 
 
@@ -483,7 +522,7 @@ class PlantyPlantSensor(PlantyCoordinatorSensor):
             coordinator,
             entry,
             PLANT_DESCRIPTION,
-            f"{entry.entry_id}_plant_{plant_id}_phase",
+            _plant_unique_id(entry.entry_id, plant_id),
             garden_id,
         )
         self._plant_id = plant_id
@@ -585,7 +624,11 @@ class PlantyTaskSensor(PlantyCoordinatorSensor):
         task = self._task()
         if not task:
             return None
-        return _task_attributes(self.coordinator.data or {}, task)
+        return _task_attributes(
+            self.coordinator.data or {},
+            task,
+            self._plant_entity_id(task.get("plant_id")),
+        )
 
 
 DETAIL_SENSOR_TYPES = (
@@ -593,6 +636,11 @@ DETAIL_SENSOR_TYPES = (
     ("plants", PlantyPlantSensor),
     ("tasks", PlantyTaskSensor),
 )
+
+
+def _plant_unique_id(entry_id: str, plant_id: str) -> str:
+    """Build the stable unique ID used by each Planty plant sensor."""
+    return f"{entry_id}_plant_{plant_id}_phase"
 
 
 def _is_overdue(value: str, today: date) -> bool:

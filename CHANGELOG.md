@@ -4,6 +4,10 @@
 
 - Ergänzt den GitHub-Actions-Workflow für Tests, Coverage-Bericht und SonarQube-Analyse.
 
+## 0.5.0 – 2026-10-12
+
+- Zeigt die Pflanze bei der nächsten Aufgabe direkt an und stellt deren Home-Assistant-Entität für Dashboards und Automationen bereit.
+
 ## 0.4.1 – 2026-10-12
 
 - Behebt die Home-Assistant-Metadatenvalidierung und verwendet gültige, übersetzbare Pflanzort-Typen.

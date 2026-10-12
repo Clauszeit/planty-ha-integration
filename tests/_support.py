@@ -90,6 +90,11 @@ def prepare_sensor_imports() -> None:
     helpers.__path__ = []
     sys.modules["homeassistant.helpers"] = helpers
 
+    entity_registry = types.ModuleType("homeassistant.helpers.entity_registry")
+    entity_registry.async_get = lambda hass: hass.entity_registry
+    helpers.entity_registry = entity_registry
+    sys.modules["homeassistant.helpers.entity_registry"] = entity_registry
+
     update_coordinator = types.ModuleType("homeassistant.helpers.update_coordinator")
 
     class CoordinatorEntity:
