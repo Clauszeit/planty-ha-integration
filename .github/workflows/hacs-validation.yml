@@ -1,0 +1,29 @@
+name: HACS validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate HACS and Home Assistant metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate HACS repository structure
+        uses: hacs/action@main
+        with:
+          category: integration
+
+      - name: Validate Home Assistant integration
+        uses: home-assistant/actions/hassfest@master

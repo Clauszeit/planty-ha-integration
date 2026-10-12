@@ -4,9 +4,19 @@ Dieses Repository enthält eine Home-Assistant-Integration für die selbst gehos
 
 Die Integration ruft den für das konfigurierte Planty-Konto freigegebenen Snapshot ab und stellt Sensoren für Gärten, aktive Pflanzen, offene Aufgaben, überfällige Aufgaben und den nächsten Aufgabentermin bereit. Die Einrichtung prüft Serveradresse und Read-only-Token.
 
-## Entwicklung
+## Installation über HACS
 
-Die Integration wird als benutzerdefinierte Home-Assistant-Integration unter `custom_components/planty/` bereitgestellt. Installiere den Ordner `custom_components/planty` in dein Home-Assistant-Konfigurationsverzeichnis und starte Home Assistant neu. Erstelle in Planty unter **Einstellungen → Home Assistant** ein Read-only-Token und füge in Home Assistant die Planty-Serveradresse ohne Pfad sowie das Token hinzu. Das Token wird in Planty nur einmal angezeigt und kann dort jederzeit widerrufen werden.
+Füge in HACS über das Drei-Punkte-Menü **Benutzerdefinierte Repositories** dieses Repository als Typ **Integration** hinzu:
+
+`https://github.com/Clauszeit/planty-ha-integration`
+
+Suche danach in HACS nach **Planty**, lade die Integration herunter und starte Home Assistant neu. Öffne anschließend **Einstellungen → Geräte & Dienste → Integration hinzufügen**, suche nach **Planty** und gib die Planty-Serveradresse ohne Pfad sowie ein Read-only-Token ein. Das Repository muss für HACS öffentlich erreichbar sein.
+
+Erstelle das Token zuvor in Planty unter **Einstellungen → Home Assistant**. Es wird dort nur einmal angezeigt und kann jederzeit widerrufen werden.
+
+## Manuelle Installation
+
+Die Integration liegt unter `custom_components/planty/`. Kopiere diesen Ordner in das `custom_components`-Verzeichnis deiner Home-Assistant-Konfiguration und starte Home Assistant neu. Füge Planty anschließend unter **Einstellungen → Geräte & Dienste** hinzu.
 
 Verwende eine HTTPS-Adresse oder ein vertrauenswürdiges, isoliertes internes Netz. Das Token gewährt ausschließlich lesenden Zugriff auf `/api/auth/me` und `/api/snapshot`; Planty filtert den Snapshot weiterhin nach Eigentum und Freigaben des zugehörigen Kontos. Home Assistant fragt alle 15 Minuten nach einem neuen Snapshot.
 
